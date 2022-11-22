@@ -35,7 +35,7 @@ int main() {
 
     while (true) {
         // Data Set input
-        std::cout << "Data_Set ÀÔ·Â(³ª°¡±â -> x): "; cin >> oper >> sec_num;
+        std::cout << "Data_Set ìž…ë ¥(ë‚˜ê°€ê¸° -> x): "; cin >> oper >> sec_num;
 
         // Exit
         if (oper == 'x') { break; }
@@ -51,12 +51,11 @@ int main() {
             int LBN = LSN / Sector_Num;
             
 
-            // ¼øÂ÷ ½ÃÀÛ
+            // ìˆœì°¨ ì‹œìž‘
             if (offset == seq) {
                 if (seq == 0) {
                     std::cout << "Seqeuence start" << "\n\n";
                     seq++;
-                    w_cnt++;
                     swmp[offset] = LSN;
                     SPBN = swmp[0] / Sector_Num;
                     seq_block_cnt--;
@@ -68,7 +67,6 @@ int main() {
                     // random write
                     if (LBN != SPBN) { 
                         Data_set[sec_num] = idx; std::cout << "idx : " << idx << "\n";
-                        //w_cnt++;
                         rwmp[Data_set[LSN]] = LSN;
                         cnt++;
 
@@ -97,7 +95,8 @@ int main() {
                                 r_cnt += free_block_cnt;
                                 w_cnt += free_block_cnt;
                                 e_cnt++;
-                                wear_level[rwmp[b]]++;
+                                free_block_cnt = Sector_Num;
+                               // wear_level[rwmp[b]]++;
                             }
                             cnt = 0;
                             idx = 0;
@@ -107,18 +106,18 @@ int main() {
                         continue;
                     }
                     else {
-                       // w_cnt++;
+                        if (rwmp[Data_set[LSN]] != -1) { rwmp[Data_set[LSN]] = -1; }
                         seq_block_cnt--;
                         swmp[offset] = LSN;
                         seq++;
                         std::cout << "seq :" << seq << "\n";
 
-                        // Seq_write blockÀÌ ²ËÃ¡À»¶§
+                        // Seq_write blockì´ ê½‰ì°¼ì„ë•Œ
                         if (seq == Sector_Num) {
                             std::cout << "Full seq_block" << "\n";
                             seq = 0;
                             e_cnt++;
-                            wear_level[LBN * Sector_Num + offset]++;
+                            //wear_level[LBN * Sector_Num + offset]++;
                             for (int a = 0; a < Sector_Num; a++) { swmp[a] = -1; }
                             std::cout << "switch block" << "\n\n";
                         }
@@ -127,12 +126,16 @@ int main() {
                 }
             }
 
-            // ¼øÂ÷¼º¿¡ ¾î±ß³ªÁö¸¸ ¼øÂ÷ºí·°¿¡ ÇØ´çµÉ¶§
+            else if (offset != seq && offset == 0) {
+                
+            }
+
+            // ìˆœì°¨ì„±ì— ì–´ê¸‹ë‚˜ì§€ë§Œ ìˆœì°¨ë¸”ëŸ­ì— í•´ë‹¹ë ë•Œ
             else if (offset != seq && LBN == SPBN && swmp[offset] == -1) {
                 Data_set[LBN * Sector_Num + offset] = -1;
                 w_cnt++;
                 e_cnt++;
-                wear_level[LBN * Sector_Num + offset]++;
+                //wear_level[LBN * Sector_Num + offset]++;
                 for (int a = 0; a < Sector_Num; a++) { 
                     if (swmp[a] > -1) { Data_set[swmp[a]] = -1; }
                     swmp[a] = -1; 
@@ -140,19 +143,19 @@ int main() {
                 std::cout << "switch operation" << "\n\n";
             }
 
-            // ¼øÂ÷¼º¿¡ ¾î±ß³ªÁö¸¸ ¼øÂ÷ºí·°¿¡ ÇØ´çµÉ¶§
+            // ìˆœì°¨ì„±ì— ì–´ê¸‹ë‚˜ì§€ë§Œ ìˆœì°¨ë¸”ëŸ­ì— í•´ë‹¹ë ë•Œ
             else if (offset != seq && LBN == SPBN && swmp[offset] != -1) {
                 std::cout << "switch seq_block" << "\n\n";
                 seq = 0;
                 w_cnt += (seq_block_cnt - 1);
                 r_cnt += (seq_block_cnt - 1);
                 e_cnt++;
-                wear_level[LBN*Sector_Num + offset]++;
+               // wear_level[LBN*Sector_Num + offset]++;
                 for (int a = 0; a < Sector_Num; a++) { swmp[a] = -1; }
                 std::cout << "switch block" << "\n\n";
             }
 
-            // Random ºí·°¿¡ ÇØ´çµÉ¶§
+            // Random ë¸”ëŸ­ì— í•´ë‹¹ë ë•Œ
             else if (offset != seq && LBN != SPBN) {
                 if (Data_set[sec_num] <= 0) { Data_set[sec_num] = idx; idx++; }
                 std::cout << "idx(random_write) : " << idx-1 << "\n\n";
@@ -184,7 +187,7 @@ int main() {
                         r_cnt += free_block_cnt;
                         w_cnt += free_block_cnt;
                         e_cnt++;
-                        wear_level[rwmp[b]]++;
+                        //wear_level[rwmp[b]]++;
                     }
                     std::cout << "Full Merge finish" << "\n\n";
                     cnt = 0;
@@ -207,10 +210,10 @@ int main() {
     for (int l = 0; l < (Log_Block_Num-1) * Sector_Num; l++) {
         std::cout << rwmp[l] << " | ";
     }
-    std::cout << "\n\n" << "wear_level" << "\n";
+    /*std::cout << "\n\n" << "wear_level" << "\n";
     for (int l = 0; l < Data_Block_Num * Sector_Num; l++) {
         std::cout << wear_level[l] << " | ";
-    }
+    }*/
 
     std::cout << "\n" << "w_cnt : " << w_cnt << "\n" << "r_cnt : " << r_cnt << "\n" << "e_cnt : " << e_cnt;
     return 0;
